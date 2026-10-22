@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#153327">
+  <meta name="description" content="Bản đồ số giới thiệu 22 cơ sở lưu trú Đà Lạt theo dữ liệu khảo sát của Nhóm 1, lớp HR22301.">
+  <title>Bản đồ số cơ sở lưu trú Đà Lạt | Nhóm 1 · HR22301</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-symbol" aria-hidden="true">❋</div>
+      <div class="brand-text">
+        <div class="brand-eyebrow">ĐÀ LẠT <span class="dot"></span> LÂM ĐỒNG</div>
+        <div class="brand-title">Bản đồ số cơ sở lưu trú</div>
+      </div>
+    </div>
+    <div class="top-right">
+      <span class="project-label">DỰ ÁN HỌC TẬP <span class="project-sep">/</span> NHÓM 1 · HR22301</span>
+      <span class="top-total"><span id="headerCount">22</span> ĐỊA ĐIỂM</span>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <div class="mobile-shade" id="mobileShade" hidden></div>
+    <aside class="sidebar" id="sidebar" aria-label="Danh sách cơ sở lưu trú">
+      <div class="sidebar-scroll">
+        <section class="hero" aria-label="Giới thiệu Đà Lạt">
+          <img id="heroPhoto" class="hero-photo" alt="">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <div class="hero-mini">KHÁM PHÁ CÙNG BẢN ĐỒ SỐ</div>
+            <h1>Chạm vào<br><em>Đà Lạt.</em></h1>
+            <p>Tìm kiếm, lọc theo nhóm và xem chi tiết các cơ sở lưu trú trên bản đồ tương tác.</p>
+          </div>
+        </section>
+
+        <div class="sidebar-inner">
+          <div class="quickstats" aria-label="Thống kê theo nhóm">
+            <div><strong>07</strong><small>5 sao / resort</small></div>
+            <div><strong>05</strong><small>4 sao</small></div>
+            <div><strong>05</strong><small>3 sao</small></div>
+            <div><strong>05</strong><small>Homestay</small></div>
+          </div>
+
+          <label class="searchbox" for="searchInput">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5"></path></svg>
+            <input id="searchInput" type="search" placeholder="Tìm theo tên, mã điểm, địa chỉ..." autocomplete="off">
+            <kbd>/</kbd>
+          </label>
+          <div class="section-line"><h2>Loại hình lưu trú</h2><span>CHỌN BỘ LỌC</span></div>
+          <div class="filter-grid" id="filterGrid" role="group" aria-label="Lọc theo nhóm cơ sở"></div>
+          <div class="section-line list-head"><h2>Địa điểm</h2><span id="resultCount">22 / 22</span></div>
+        </div>
+        <div id="placeList" class="place-list" aria-live="polite"></div>
+        <div class="source-footer">
+          <details id="qaBox" class="qa-box">
+            <summary><span>⚠️ <span id="qaCount">0</span> ghi chú dữ liệu</span><span class="qa-arrow">⌄</span></summary>
+            <div id="qaDetails" class="qa-details"></div>
+          </details>
+          <p><strong>Nguồn:</strong> Bảng khảo sát của Nhóm 1, lớp HR22301 và các ảnh do người dùng tải lên trong lượt làm việc này.</p>
+        </div>
+      </div>
+    </aside>
+
+    <section class="map-area" aria-label="Bản đồ vị trí các cơ sở lưu trú Đà Lạt">
+      <div id="map" class="map"></div>
+      <div class="map-gradient" aria-hidden="true"></div>
+      <div class="map-toolbar" role="toolbar" aria-label="Công cụ bản đồ">
+        <div class="toolbar-left">
+          <button id="mobileMenu" class="tool-icon mobile-menu" type="button" aria-label="Mở danh sách địa điểm">☰</button>
+          <div class="map-heading"><span class="green-pulse"></span><div><strong>Bản đồ tương tác Đà Lạt</strong><small id="mapSubtitle">22 điểm trong khu vực Đà Lạt</small></div></div>
+        </div>
+        <div class="toolbar-right">
+          <button id="fitDalat" class="tool-button selected" type="button" title="Khung nhìn khu vực Đà Lạt">⌖ <span>Đà Lạt</span></button>
+          <button id="fitAll" class="tool-button" type="button" title="Xem tất cả 22 cơ sở">⊞ <span>Tất cả</span></button>
+          <button id="themeToggle" class="tool-icon" type="button" title="Chuyển nền bản đồ sáng/tối" aria-label="Chuyển chế độ nền bản đồ">☾</button>
+          <button id="fullScreen" class="tool-icon" type="button" title="Toàn màn hình" aria-label="Chuyển chế độ toàn màn hình">⛶</button>
+        </div>
+      </div>
+      <div class="map-footer">
+        <div class="map-legend" id="legend"><span class="legend-label">CHÚ GIẢI</span><span><i class="legend-dot d5"></i>5 sao</span><span><i class="legend-dot d4"></i>4 sao</span><span><i class="legend-dot d3"></i>3 sao</span><span><i class="legend-dot dh"></i>Homestay</span></div>
+        <div class="map-tip">Nhấn vào biểu tượng <span>📍</span> để mở thông tin và ảnh</div>
+      </div>
+    </section>
+
+    <aside id="detailPanel" class="detail-panel" aria-hidden="true" aria-label="Chi tiết cơ sở lưu trú">
+      <div class="detail-top">
+        <span class="detail-kicker">THÔNG TIN ĐỊA ĐIỂM</span>
+        <button class="detail-close" id="closeDetail" type="button" aria-label="Đóng thông tin">×</button>
+      </div>
+      <div id="detailContent" class="detail-scroll"></div>
+    </aside>
+  </main>
+  <div id="toast" class="toast" aria-live="polite"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+<script src="du_lieu.js"></script>
+<script>
+'use strict';
+(() => {
+  const PLACES = Array.isArray(window.DALAT_PLACES) ? window.DALAT_PLACES : [];
+  const QA = Array.isArray(window.DALAT_QA) ? window.DALAT_QA : [];
+  const HERO = window.DALAT_HERO || '';
+  const CATS = [
+    {key:'all',name:'Tất cả',short:'Tất cả',emoji:'◈',color:'#295d4a'},
+    {key:'5s',name:'Khách sạn / resort 5 sao',short:'5 sao',emoji:'✦',color:'#d5a146'},
+    {key:'4s',name:'Khách sạn 4 sao',short:'4 sao',emoji:'◆',color:'#4f89be'},
+    {key:'3s',name:'Khách sạn 3 sao',short:'3 sao',emoji:'●',color:'#3ea17f'},
+    {key:'homestay',name:'Homestay',short:'Homestay',emoji:'⌂',color:'#a47ac7'}
+  ];
+
+  const $ = id => document.getElementById(id);
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, x => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
+  const searchNorm = v => String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[đĐ]/g,'d').toLowerCase();
+  const validUrl = value => { try { const u = new URL(String(value)); return ['http:','https:'].includes(u.protocol)?u.href:''; } catch { return ''; } };
+  const shortText = (v,max=88) => { const t=String(v||'').replace(/\s+/g,' ').trim(); return t.length>max?t.slice(0,max-1).replace(/\s+\S*$/,'')+'…':t; };
+  const coordText = p => Number.isFinite(p.lat)&&Number.isFinite(p.lng) ? `${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}` : 'Chưa có tọa độ';
+  const directions = p => `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.lat+','+p.lng)}`;
+  const findCat = key => CATS.find(c=>c.key===key) || CATS[0];
+  const categoryCounts = key => key==='all' ? PLACES.length : PLACES.filter(p=>p.category===key).length;
+  let group='all', text='', chosen=null, dark=false;
+  let map, lightLayer, darkLayer, markers = new Map();
+  const mobileMQ = () => window.matchMedia('(max-width: 900px)').matches;
+
+  function toast(message){
+    const el = $('toast');
+    el.textContent = message; el.classList.add('show');
+    clearTimeout(toast._t); toast._t = setTimeout(()=>el.classList.remove('show'), 1800);
+  }
+  function markerHtml(color, emoji){
+    return `<div class="pin" style="--pin:${color}"><span>${emoji}</span></div>`;
+  }
+  function createIcon(place){
+    const c = findCat(place.category);
+    const emoji = place.category==='homestay' ? '⌂' : place.category==='5s' ? '★' : place.category==='4s' ? '◆' : '●';
+    return L.divIcon({className:'custom-marker', html: markerHtml(c.color, emoji), iconSize:[28,36], iconAnchor:[14,34], popupAnchor:[0,-28]});
+  }
+  function filtered(){
+    return PLACES.filter(p => (group==='all' || p.category===group) && searchNorm([p.name,p.address,p.id,p.type,p.group].join(' ')).includes(searchNorm(text)));
+  }
+  function safePhoto(place){ return Array.isArray(place.photos) && place.photos.length ? place.photos[0] : ''; }
+  function badge(place){
+    const c = findCat(place.category);
+    return `<span class="cat-badge" style="--cat:${c.color}">${esc(c.emoji)} ${esc(c.short)} <small>${esc(place.type)}</small></span>`;
+  }
+  function renderFilters(){
+    $('filterGrid').innerHTML = CATS.map(c => `<button class="filter-chip ${group===c.key?'on':''}" type="button" data-filter="${c.key}" style="--cat:${c.color}"><span class="filter-symbol">${esc(c.emoji)}</span><span>${esc(c.short)}</span><b>${categoryCounts(c.key)}</b></button>`).join('');
+    $('filterGrid').querySelectorAll('button').forEach(btn => btn.addEventListener('click',()=>{ group = btn.dataset.filter; render(); }));
+  }
+  function renderList(items){
+    const box = $('placeList');
+    $('resultCount').textContent = `${items.length} / ${PLACES.length}`;
+    if(!items.length){
+      box.innerHTML = '<div class="empty-state">Không tìm thấy cơ sở phù hợp với bộ lọc hiện tại.</div>';
+      return;
+    }
+    box.innerHTML = items.map(p => {
+      const img = safePhoto(p);
+      return `<button class="place-card ${chosen===p.id?'active':''}" type="button" data-id="${esc(p.id)}" style="--cat:${findCat(p.category).color}">
+        <div class="card-thumb">${img ? `<img src="${img}" loading="lazy" alt="Ảnh ${esc(p.name)}">` : `<span class="thumb-fallback">${p.category==='homestay'?'🏡':'🏨'}</span>`}</div>
+        <div class="card-text"><div class="card-code">${esc(p.id)} <span>•</span> ${esc(findCat(p.category).short)}</div><strong>${esc(p.name)}</strong><small>${esc(shortText(p.address,70))}</small></div>
+        <span class="card-arrow">›</span></button>`;
+    }).join('');
+    box.querySelectorAll('.place-card').forEach(btn => btn.addEventListener('click', ()=> choose(btn.dataset.id, true)));
+  }
+  function buildGallery(place){
+    if(place.photos && place.photos.length){
+      return `<div class="gallery">${place.photos.map((src,i)=>`<img src="${src}" alt="${esc(place.name)} - ảnh ${i+1}" loading="lazy">`).join('')}</div>`;
+    }
+    const fallback = (place.expectedPhotoFiles||[]).filter(Boolean).map(v => `<li>${esc(v)}</li>`).join('');
+    return `<div class="no-photo"><strong>Chưa có ảnh nhúng trong bộ 3 tệp.</strong><p>Cơ sở này vẫn có dữ liệu mô tả và vị trí. Nếu muốn bổ sung ảnh, có thể gắn thêm đúng các tên tệp sau:</p>${fallback ? `<ul>${fallback}</ul>` : ''}</div>`;
+  }
+  function openDetail(place){
+    chosen = place.id;
+    const maps = validUrl(place.maps);
+    const notes = (place.notes||[]).length ? `<div class="mini-notes"><h4>Ghi chú dữ liệu</h4><ul>${place.notes.map(n=>`<li>${esc(n)}</li>`).join('')}</ul></div>` : '';
+    $('detailContent').innerHTML = `
+      <div class="detail-head">
+        <div class="detail-code">${esc(place.id)}</div>
+        <h3>${esc(place.name)}</h3>
+        ${badge(place)}
+        <div class="detail-meta">
+          <div><span>Địa chỉ</span><strong>${esc(place.address)}</strong></div>
+          <div><span>Hạng sao</span><strong>${esc(place.star)}</strong></div>
+          <div><span>Tọa độ</span><strong>${esc(coordText(place))}</strong></div>
+        </div>
+        <div class="detail-actions">
+          ${maps ? `<a class="action-btn primary" href="${maps}" target="_blank" rel="noopener">Mở Google Maps ↗</a>` : ''}
+          ${Number.isFinite(place.lat)&&Number.isFinite(place.lng) ? `<a class="action-btn" href="${directions(place)}" target="_blank" rel="noopener">Chỉ đường</a>` : ''}
+        </div>
+      </div>
+      ${buildGallery(place)}
+      <div class="detail-body">
+        <h4>Mô tả cơ sở</h4>
+        <p>${esc(place.description).replace(/\n+/g,'</p><p>')}</p>
+        ${notes}
+      </div>`;
+    $('detailPanel').classList.add('open');
+    $('detailPanel').setAttribute('aria-hidden','false');
+    renderList(filtered());
+  }
+  function closeDetail(){
+    chosen = null;
+    $('detailPanel').classList.remove('open');
+    $('detailPanel').setAttribute('aria-hidden','true');
+    renderList(filtered());
+  }
+  function choose(id, fly){
+    const place = PLACES.find(p=>p.id===id); if(!place) return;
+    openDetail(place);
+    const marker = markers.get(id);
+    if(marker){
+      if(fly) map.flyTo([place.lat, place.lng], Math.max(map.getZoom(), 15), {duration:0.8});
+      marker.openPopup();
+    }
+    if(mobileMQ()) closeSidebar();
+  }
+  function renderMarkers(items){
+    markers.forEach(m => map.removeLayer(m));
+    markers = new Map();
+    items.forEach(p => {
+      if(!Number.isFinite(p.lat) || !Number.isFinite(p.lng)) return;
+      const m = L.marker([p.lat,p.lng], {icon:createIcon(p)}).addTo(map);
+      m.bindPopup(`<strong>${esc(p.name)}</strong><br>${esc(p.id)} · ${esc(findCat(p.category).short)}<br><button class="popup-btn" data-id="${esc(p.id)}">Xem chi tiết</button>`);
+      m.on('popupopen', ()=> {
+        setTimeout(() => {
+          const btn = document.querySelector('.popup-btn[data-id="'+CSS.escape(p.id)+'"]');
+          if(btn) btn.onclick = () => choose(p.id, false);
+        }, 0);
+      });
+      m.on('click', ()=> choose(p.id,false));
+      markers.set(p.id, m);
+    });
+  }
+  function fitAll(items){
+    const pts = items.filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lng)).map(p=>[p.lat,p.lng]);
+    if(!pts.length) return;
+    map.fitBounds(pts, {padding:[36,36]});
+  }
+  function fitDalat(){
+    map.setView([11.9404, 108.4583], 13);
+  }
+  function setTheme(useDark){
+    dark = useDark;
+    if(dark){ if(map.hasLayer(lightLayer)) map.removeLayer(lightLayer); if(!map.hasLayer(darkLayer)) darkLayer.addTo(map); $('themeToggle').textContent='☀'; }
+    else { if(map.hasLayer(darkLayer)) map.removeLayer(darkLayer); if(!map.hasLayer(lightLayer)) lightLayer.addTo(map); $('themeToggle').textContent='☾'; }
+  }
+  function openSidebar(){ $('sidebar').classList.add('show'); $('mobileShade').hidden = false; }
+  function closeSidebar(){ $('sidebar').classList.remove('show'); $('mobileShade').hidden = true; }
+  function renderQA(){
+    $('qaCount').textContent = QA.length;
+    $('qaDetails').innerHTML = QA.map(item => `<div class="qa-item"><strong>${esc(item.title)}</strong><p>${esc(item.detail)}</p></div>`).join('');
+  }
+  function render(){
+    const items = filtered();
+    renderFilters();
+    renderList(items);
+    renderMarkers(items);
+  }
+  function initMap(){
+    map = L.map('map', {zoomControl:false, attributionControl:true});
+    lightLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; OpenStreetMap'});
+    darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {maxZoom:19, attribution:'&copy; OpenStreetMap &copy; CARTO'});
+    lightLayer.addTo(map);
+    L.control.zoom({position:'bottomright'}).addTo(map);
+    fitDalat();
+  }
+
+  function bindUI(){
+    $('heroPhoto').src = HERO;
+    $('searchInput').addEventListener('input', e => { text = e.target.value || ''; render(); });
+    document.addEventListener('keydown', e => {
+      if(e.key === '/' && document.activeElement !== $('searchInput')) { e.preventDefault(); $('searchInput').focus(); }
+      if(e.key === 'Escape') { if($('detailPanel').classList.contains('open')) closeDetail(); if(mobileMQ()) closeSidebar(); }
+    });
+    $('closeDetail').addEventListener('click', closeDetail);
+    $('fitDalat').addEventListener('click', () => { fitDalat(); $('fitDalat').classList.add('selected'); $('fitAll').classList.remove('selected'); });
+    $('fitAll').addEventListener('click', () => { fitAll(filtered()); $('fitAll').classList.add('selected'); $('fitDalat').classList.remove('selected'); });
+    $('themeToggle').addEventListener('click', () => setTheme(!dark));
+    $('mobileMenu').addEventListener('click', openSidebar);
+    $('mobileShade').addEventListener('click', closeSidebar);
+    $('fullScreen').addEventListener('click', async () => {
+      try {
+        if(!document.fullscreenElement) await document.documentElement.requestFullscreen();
+        else await document.exitFullscreen();
+      } catch(err){ toast('Trình duyệt không hỗ trợ toàn màn hình.'); }
+    });
+  }
+
+  initMap();
+  bindUI();
+  renderQA();
+  render();
+})();
+</script>
+</body>
+</html>
